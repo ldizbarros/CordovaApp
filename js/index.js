@@ -44,38 +44,45 @@ var app = {
     },
 
     sacarFoto: function() {
-    	navigator.camera.getPicture(this.onSuccess, this.onFail, { quality: 25,
-        ºdestinationType: Camera.DestinationType.DATA_URL
-	});
+    	navigator.camera.getPicture(this.onSuccess, this.onFail, { quality: 50,
+    		destinationType: Camera.DestinationType.FILE_URI 
+	    });
     },
-    
-    onSuccess: function(imageData){
-    	//var image = document.getElementById('myImage');
-    	//image.src = "data:image/jpeg;base64," + imageData;
-    	enviarFirebase(imageData, "imagen")
+
+    onSuccess: function(imageURI){
+        var image = document.getElementById('myImage');
+        image.src = imageURI;
+    	this.enviarFirebase(imageURI);
     },
 
     onFail: function(message) {
     	alert('Failed because: ' + message);
     },
     
-    enviarFirebase: function(file, nombre) {
+    enviarFirebase: function(imageURI) {
         var firebase = require("firebase");
         var config = {
-            storageBucket: "gs://galeria-aac84.appspot.com/"
+            apiKey: "AIzaSyCLkiWtog8dwWGPeTCzKKSZU4QjFfTi0-k",
+            authDomain: "galeria-aac84.firebaseapp.com",
+            databaseURL: "https://galeria-aac84.firebaseio.com",
+            projectId: "galeria-aac84",
+            storageBucket: "galeria-aac84.appspot.com",
+            messagingSenderId: "603710771978"
         };
         firebase.initializeApp(config);
+
         var storageRef = firebase.storage().ref();
-        var uploadTask = storageRef.child('images/' + nombre).put(file);
-        uploadTask.on('state_changed', function (snapshot) {
-            console.info(snapshot);
-        }, function (error) {
-            console.error(error);
-        }, function () {
+        var uploadTask = storageRef.child('images/test.jpg').put(imageURI);
+
+        uploadTask.on('state_changed', function(snapshot) {
+            console.log(snapshot);
+        }, function(error) {
+            console.log(error);
+        }, function() {
             var downloadURL = uploadTask.snapshot.downloadURL;
             console.log(downloadURL);
-    });
-}
+        });
+    }
 };
 
 app.initialize();
